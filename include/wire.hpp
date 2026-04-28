@@ -12,4 +12,16 @@ struct MarketPacket {
     uint64_t seq_no;
 };
 
+static_assert(sizeof(MarketPacket) == 26);
+
+struct OrderPacket {
+    uint16_t instrument_id;
+    int32_t  price;
+    uint32_t qty;
+    uint8_t  side;
+    uint64_t seq_no;
+};
+
+static_assert(sizeof(OrderPacket) == 19);
+
 #pragma pack(pop)
