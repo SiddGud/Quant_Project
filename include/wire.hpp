@@ -25,3 +25,10 @@ struct OrderPacket {
 static_assert(sizeof(OrderPacket) == 19);
 
 #pragma pack(pop)
+
+enum class ProcessResult : uint8_t {
+    ORDER_EMITTED  = 0,
+    NO_SIGNAL      = 1,
+    RISK_REJECTED  = 2,
+    INVALID_FRAME  = 3,
+};
