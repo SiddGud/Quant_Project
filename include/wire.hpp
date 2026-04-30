@@ -32,3 +32,13 @@ enum class ProcessResult : uint8_t {
     RISK_REJECTED  = 2,
     INVALID_FRAME  = 3,
 };
+
+inline const char* result_str(ProcessResult r) {
+    switch (r) {
+        case ProcessResult::ORDER_EMITTED: return "ORDER_EMITTED";
+        case ProcessResult::NO_SIGNAL:     return "NO_SIGNAL";
+        case ProcessResult::RISK_REJECTED: return "RISK_REJECTED";
+        case ProcessResult::INVALID_FRAME: return "INVALID_FRAME";
+    }
+    return "UNKNOWN";
+}
