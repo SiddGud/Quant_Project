@@ -10,6 +10,8 @@ struct OrderBook {
 
     [[nodiscard]]
     bool update(const MarketPacket& pkt) noexcept {
+        if (pkt.ask_price <= pkt.bid_price || pkt.bid_price <= 0)
+            return false;
         bid_price = pkt.bid_price;
         ask_price = pkt.ask_price;
         bid_qty   = pkt.bid_qty;
