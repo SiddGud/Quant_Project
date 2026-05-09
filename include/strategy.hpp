@@ -8,15 +8,18 @@ enum class Signal : uint8_t {
     SELL      = 2,
 };
 
+constexpr uint32_t IMBALANCE_NUM   = 3;
+constexpr uint32_t IMBALANCE_DENOM = 2;
+
 [[nodiscard]]
 inline Signal decide(const OrderBook& book) noexcept {
     if (!book.has_data()) return Signal::NO_SIGNAL;
 
-    const double bq = book.bid_qty;
-    const double aq = book.ask_qty;
+    const uint64_t bq = book.bid_qty;
+    const uint64_t aq = book.ask_qty;
 
-    if (bq > aq * 1.5) return Signal::BUY;
-    if (aq > bq * 1.5) return Signal::SELL;
+    if (bq * IMBALANCE_DENOM > aq * IMBALANCE_NUM) return Signal::BUY;
+    if (aq * IMBALANCE_DENOM > bq * IMBALANCE_NUM) return Signal::SELL;
 
     return Signal::NO_SIGNAL;
 }
