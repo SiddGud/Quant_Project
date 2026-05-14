@@ -2,6 +2,9 @@
 #include ""strategy.hpp""
 #include <cstdint>
 
+// RiskGuard applies pre-trade checks before any order is emitted.
+// check() is side-effect free. commit() updates state.
+// Call check() first, only call commit() if the order is accepted.
 struct RiskGuard {
     int32_t  max_position  = 100;
     uint64_t max_notional  = 10'000'000ULL;
