@@ -10,7 +10,8 @@ struct TradingEngine {
 
     [[nodiscard]]
     ProcessResult process(const MarketPacket& in, OrderPacket& out) noexcept {
-        book.update(in);
+        if (!book.update(in))
+            return ProcessResult::INVALID_FRAME;
         const Signal sig = decide(book);
         if (sig == Signal::NO_SIGNAL)
             return ProcessResult::NO_SIGNAL;
