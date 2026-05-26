@@ -21,7 +21,20 @@ static MarketPacket make_packet(uint16_t id,
     return p;
 }
 
+static void run_scenarios() {
+    std::cout << ""--- scenarios ---\n"";
+    OrderPacket out{};
+
+    {
+        TradingEngine eng;
+        auto pkt = make_packet(1, 100000, 100100, 500, 500);
+        auto r   = eng.process(pkt, out);
+        bool ok  = (r == ProcessResult::NO_SIGNAL);
+        std::cout << ""[NO_SIGNAL balanced book]  "" << (ok ? ""PASS"" : ""FAIL"") << ""\n"";
+    }
+}
+
 int main(int argc, char* argv[]) {
-    std::cout << ""quant-project engine\n"";
+    run_scenarios();
     return 0;
 }
