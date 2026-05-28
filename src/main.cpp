@@ -29,8 +29,23 @@ static void run_scenarios() {
         TradingEngine eng;
         auto pkt = make_packet(1, 100000, 100100, 500, 500);
         auto r   = eng.process(pkt, out);
-        bool ok  = (r == ProcessResult::NO_SIGNAL);
-        std::cout << ""[NO_SIGNAL balanced book]  "" << (ok ? ""PASS"" : ""FAIL"") << ""\n"";
+        std::cout << ""[NO_SIGNAL balanced book]  "" << (r == ProcessResult::NO_SIGNAL ? ""PASS"" : ""FAIL"") << ""\n"";
+    }
+
+    {
+        TradingEngine eng;
+        auto pkt = make_packet(1, 100000, 100100, 1500, 500);
+        auto r   = eng.process(pkt, out);
+        bool ok  = (r == ProcessResult::ORDER_EMITTED && out.side == 0);
+        std::cout << ""[BUY  bid dominant]        "" << (ok ? ""PASS"" : ""FAIL"") << ""\n"";
+    }
+
+    {
+        TradingEngine eng;
+        auto pkt = make_packet(1, 100000, 100100, 500, 1500);
+        auto r   = eng.process(pkt, out);
+        bool ok  = (r == ProcessResult::ORDER_EMITTED && out.side == 1);
+        std::cout << ""[SELL ask dominant]        "" << (ok ? ""PASS"" : ""FAIL"") << ""\n"";
     }
 }
 
