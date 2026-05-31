@@ -24,29 +24,35 @@ static MarketPacket make_packet(uint16_t id,
 static void run_scenarios() {
     std::cout << ""--- scenarios ---\n"";
     OrderPacket out{};
+    int passed = 0;
 
-    {
-        TradingEngine eng;
-        auto pkt = make_packet(1, 100000, 100100, 500, 500);
-        auto r   = eng.process(pkt, out);
-        std::cout << ""[NO_SIGNAL balanced book]  "" << (r == ProcessResult::NO_SIGNAL ? ""PASS"" : ""FAIL"") << ""\n"";
-    }
+    auto check = [&](const char* name, bool ok) {
+        std::cout << (ok ? ""[PASS] "" : ""[FAIL] "") << name << ""\n"";
+        if (ok) ++passed;
+    };
 
-    {
-        TradingEngine eng;
-        auto pkt = make_packet(1, 100000, 100100, 1500, 500);
-        auto r   = eng.process(pkt, out);
-        bool ok  = (r == ProcessResult::ORDER_EMITTED && out.side == 0);
-        std::cout << ""[BUY  bid dominant]        "" << (ok ? ""PASS"" : ""FAIL"") << ""\n"";
-    }
+    { TradingEngine eng;
+      auto r = eng.process(make_packet(1, 100000, 100100, 500,  500),  out);
+      check(""NO_SIGNAL balanced book"", r == ProcessResult::NO_SIGNAL); }
 
-    {
-        TradingEngine eng;
-        auto pkt = make_packet(1, 100000, 100100, 500, 1500);
-        auto r   = eng.process(pkt, out);
-        bool ok  = (r == ProcessResult::ORDER_EMITTED && out.side == 1);
-        std::cout << ""[SELL ask dominant]        "" << (ok ? ""PASS"" : ""FAIL"") << ""\n"";
-    }
+    { TradingEngine eng;
+      auto r = eng.process(make_packet(1, 100000, 100100, 1500, 500),  out);
+      check(""BUY  bid dominant"",  r == ProcessResult::ORDER_EMITTED && out.side == 0); }
+
+    { TradingEngine eng;
+      auto r = eng.process(make_packet(1, 100000, 100100, 500,  1500), out);
+      check(""SELL ask dominant"", r == ProcessResult::ORDER_EMITTED && out.side == 1); }
+
+    { TradingEngine eng;
+      eng.risk.max_notional = 100;
+      auto r = eng.process(make_packet(1, 100000, 100100, 1500, 500),  out);
+      check(""RISK_REJECTED notional limit"", r == ProcessResult::RISK_REJECTED); }
+
+    { TradingEngine eng;
+      auto r = eng.process(make_packet(1, 100100, 99900, 1500, 500),   out);
+      check(""INVALID_FRAME ask < bid"", r == ProcessResult::INVALID_FRAME); }
+
+    std::cout << ""\n"" << passed << ""/5 passed\n"";
 }
 
 int main(int argc, char* argv[]) {
