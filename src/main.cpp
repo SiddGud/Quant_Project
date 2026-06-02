@@ -55,7 +55,15 @@ static void run_scenarios() {
     std::cout << ""\n"" << passed << ""/5 passed\n"";
 }
 
+static void run_benchmark() {
+    std::cout << ""--- benchmark ---\n"";
+    // TODO
+}
+
 int main(int argc, char* argv[]) {
-    run_scenarios();
+    bool bench = (argc > 1 && std::string(argv[1]) == ""bench"");
+    if (bench) run_benchmark();
+    else        run_scenarios();
     return 0;
 }
+
