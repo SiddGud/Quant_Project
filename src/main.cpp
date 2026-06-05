@@ -33,31 +33,53 @@ static void run_scenarios() {
 
     { TradingEngine eng;
       auto r = eng.process(make_packet(1, 100000, 100100, 500,  500),  out);
-      check(""NO_SIGNAL balanced book"", r == ProcessResult::NO_SIGNAL); }
-
+      check(""NO_SIGNAL balanced book"",  r == ProcessResult::NO_SIGNAL); }
     { TradingEngine eng;
       auto r = eng.process(make_packet(1, 100000, 100100, 1500, 500),  out);
-      check(""BUY  bid dominant"",  r == ProcessResult::ORDER_EMITTED && out.side == 0); }
-
+      check(""BUY  bid dominant"",         r == ProcessResult::ORDER_EMITTED && out.side == 0); }
     { TradingEngine eng;
       auto r = eng.process(make_packet(1, 100000, 100100, 500,  1500), out);
-      check(""SELL ask dominant"", r == ProcessResult::ORDER_EMITTED && out.side == 1); }
-
-    { TradingEngine eng;
-      eng.risk.max_notional = 100;
+      check(""SELL ask dominant"",         r == ProcessResult::ORDER_EMITTED && out.side == 1); }
+    { TradingEngine eng; eng.risk.max_notional = 100;
       auto r = eng.process(make_packet(1, 100000, 100100, 1500, 500),  out);
-      check(""RISK_REJECTED notional limit"", r == ProcessResult::RISK_REJECTED); }
-
+      check(""RISK_REJECTED notional"",    r == ProcessResult::RISK_REJECTED); }
     { TradingEngine eng;
       auto r = eng.process(make_packet(1, 100100, 99900, 1500, 500),   out);
-      check(""INVALID_FRAME ask < bid"", r == ProcessResult::INVALID_FRAME); }
+      check(""INVALID_FRAME ask < bid"",   r == ProcessResult::INVALID_FRAME); }
 
     std::cout << ""\n"" << passed << ""/5 passed\n"";
 }
 
 static void run_benchmark() {
-    std::cout << ""--- benchmark ---\n"";
-    // TODO
+    constexpr int N     = 1'000'000;
+    constexpr int BATCH = 1000;
+
+    TradingEngine eng;
+    eng.risk.max_notional = 100'000'000'000ULL;
+    eng.risk.max_position = 1'000'000;
+
+    OrderPacket out{};
+    std::vector<int64_t> samples;
+    samples.reserve(N / BATCH);
+
+    MarketPacket pkt = make_packet(1, 100000, 100100, 1500, 500);
+
+    std::cout << ""running "" << N << "" events...\n"";
+
+    for (int b = 0; b < N / BATCH; ++b) {
+        auto t0 = std::chrono::steady_clock::now();
+        for (int j = 0; j < BATCH; ++j) {
+            pkt.seq_no = static_cast<uint64_t>(b * BATCH + j);
+            eng.process(pkt, out);
+        }
+        auto t1 = std::chrono::steady_clock::now();
+        int64_t ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+        samples.push_back(ns / BATCH);
+    }
+
+    std::sort(samples.begin(), samples.end());
+    std::cout << ""p50 "" << samples[samples.size() * 50 / 100] << "" ns\n"";
+    std::cout << ""p99 "" << samples[samples.size() * 99 / 100] << "" ns\n"";
 }
 
 int main(int argc, char* argv[]) {
@@ -66,4 +88,3 @@ int main(int argc, char* argv[]) {
     else        run_scenarios();
     return 0;
 }
-
