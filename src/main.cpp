@@ -58,7 +58,6 @@ static void run_benchmark() {
     eng.risk.max_notional = 100'000'000'000ULL;
     eng.risk.max_position = 1'000'000;
 
-    // Rotate through 8 distinct packets so the compiler cannot fold the call.
     MarketPacket pool[8];
     for (int k = 0; k < 4; ++k) {
         uint32_t bq = 1500u + static_cast<uint32_t>(k) * 100u;
@@ -71,7 +70,8 @@ static void run_benchmark() {
     std::vector<int64_t> samples;
     samples.reserve(N / BATCH);
 
-    std::cout << ""running "" << N << "" events...\n"";
+    uint64_t order_count = 0, no_sig_count = 0;
+    std::cout << ""running "" << N << "" events (batches of "" << BATCH << "")...\n"";
 
     for (int b = 0; b < N / BATCH; ++b) {
         auto t0 = std::chrono::steady_clock::now();
@@ -80,20 +80,34 @@ static void run_benchmark() {
             pkt.seq_no       = static_cast<uint64_t>(b * BATCH + j);
             auto r = eng.process(pkt, out);
             sink = out.side;
-            (void)r;
+            if (r == ProcessResult::ORDER_EMITTED) ++order_count;
+            else                                   ++no_sig_count;
         }
         auto t1 = std::chrono::steady_clock::now();
-        int64_t ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
-        samples.push_back(ns / BATCH);
+        samples.push_back(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() / BATCH);
     }
 
     (void)static_cast<uint8_t>(sink);
     std::sort(samples.begin(), samples.end());
 
+    int64_t total = 0;
+    for (auto v : samples) total += v;
+    double mean = static_cast<double>(total) / samples.size();
+
     int sz = static_cast<int>(samples.size());
-    std::cout << ""p50 "" << samples[sz * 50 / 100] << "" ns\n"";
-    std::cout << ""p95 "" << samples[sz * 95 / 100] << "" ns\n"";
-    std::cout << ""p99 "" << samples[sz * 99 / 100] << "" ns\n"";
+    auto pct = [&](double p) { return samples[static_cast<size_t>(p / 100.0 * sz)]; };
+
+    std::cout << ""\nevents:  "" << N     << ""\n"";
+    std::cout << ""orders:  "" << order_count  << ""\n"";
+    std::cout << ""no-sig:  "" << no_sig_count << ""\n\n"";
+    std::cout << ""min    "" << samples.front()                  << "" ns\n"";
+    std::cout << ""mean   "" << static_cast<int64_t>(mean)       << "" ns\n"";
+    std::cout << ""p50    "" << pct(50.0)                        << "" ns\n"";
+    std::cout << ""p95    "" << pct(95.0)                        << "" ns\n"";
+    std::cout << ""p99    "" << pct(99.0)                        << "" ns\n"";
+    std::cout << ""p99.9  "" << pct(99.9)                        << "" ns\n"";
+    std::cout << ""max    "" << samples.back()                   << "" ns\n"";
 }
 
 int main(int argc, char* argv[]) {
