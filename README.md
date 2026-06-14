@@ -1,4 +1,4 @@
-# quant-project
+﻿# quant-project
 
 A low-latency order book engine written in C++20.
 
@@ -193,3 +193,4 @@ Keeping the L2 book as plain struct fields instead of a map kept all book state 
 Separating check() and commit() in the risk guard made it easier to unit test risk logic without worrying about state mutation.
 
 The single process() call means the compiler can see the entire hot path at once and inline across all four components.
+
