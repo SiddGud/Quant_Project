@@ -1,28 +1,32 @@
 ﻿#pragma once
 #include <cstdint>
 
+// Fixed-size packed structs for the market-data and order wire protocol.
+// Using #pragma pack(1) so every field is at its natural offset with no
+// padding, which means the struct can be cast from raw bytes directly.
+
 #pragma pack(push, 1)
 
 struct MarketPacket {
-    uint16_t instrument_id;
-    int32_t  bid_price;
-    int32_t  ask_price;
-    uint32_t bid_qty;
-    uint32_t ask_qty;
-    uint64_t seq_no;
+    uint16_t instrument_id;  // symbol index, 0-based
+    int32_t  bid_price;      // best visible bid price in integer ticks
+    int32_t  ask_price;      // best visible ask price in integer ticks
+    uint32_t bid_qty;        // visible bid quantity
+    uint32_t ask_qty;        // visible ask quantity
+    uint64_t seq_no;         // monotonic sequence number
 };
 
-static_assert(sizeof(MarketPacket) == 26);
+static_assert(sizeof(MarketPacket) == 26, ""MarketPacket size changed"");
 
 struct OrderPacket {
     uint16_t instrument_id;
     int32_t  price;
     uint32_t qty;
-    uint8_t  side;
+    uint8_t  side;   // 0 = BUY, 1 = SELL
     uint64_t seq_no;
 };
 
-static_assert(sizeof(OrderPacket) == 19);
+static_assert(sizeof(OrderPacket) == 19, ""OrderPacket size changed"");
 
 #pragma pack(pop)
 
@@ -35,10 +39,10 @@ enum class ProcessResult : uint8_t {
 
 inline const char* result_str(ProcessResult r) {
     switch (r) {
-        case ProcessResult::ORDER_EMITTED: return "ORDER_EMITTED";
-        case ProcessResult::NO_SIGNAL:     return "NO_SIGNAL";
-        case ProcessResult::RISK_REJECTED: return "RISK_REJECTED";
-        case ProcessResult::INVALID_FRAME: return "INVALID_FRAME";
+        case ProcessResult::ORDER_EMITTED: return ""ORDER_EMITTED"";
+        case ProcessResult::NO_SIGNAL:     return ""NO_SIGNAL"";
+        case ProcessResult::RISK_REJECTED: return ""RISK_REJECTED"";
+        case ProcessResult::INVALID_FRAME: return ""INVALID_FRAME"";
     }
-    return "UNKNOWN";
+    return ""UNKNOWN"";
 }
