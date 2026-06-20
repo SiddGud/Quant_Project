@@ -169,7 +169,7 @@ Batched timing is used (1000 calls per timing sample) because Windows steady_clo
 Events:         1,000,000
 Orders emitted: ~100,000
 
-p50    =   2 ns
+p50    =   2 ns    (12th-gen Intel, Windows, Release build)
 p95    =   6 ns
 p99    =   6 ns
 p99.9  =  57 ns
@@ -193,4 +193,5 @@ Keeping the L2 book as plain struct fields instead of a map kept all book state 
 Separating check() and commit() in the risk guard made it easier to unit test risk logic without worrying about state mutation.
 
 The single process() call means the compiler can see the entire hot path at once and inline across all four components.
+
 
