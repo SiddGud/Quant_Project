@@ -1,5 +1,5 @@
-﻿#pragma once
-#include ""book.hpp""
+#pragma once
+#include "book.hpp"
 #include <cstdint>
 
 enum class Signal : uint8_t {
@@ -8,9 +8,12 @@ enum class Signal : uint8_t {
     SELL      = 2,
 };
 
-constexpr uint32_t IMBALANCE_NUM   = 3;
-constexpr uint32_t IMBALANCE_DENOM = 2;
+constexpr uint64_t IMBALANCE_NUM   = 3;
+constexpr uint64_t IMBALANCE_DENOM = 2;
 
+// decide() looks at visible bid/ask quantity and returns a directional signal.
+// Uses integer arithmetic: bid*2 > ask*3  is equivalent to  bid > ask*1.5
+// without any floating-point.
 [[nodiscard]]
 inline Signal decide(const OrderBook& book) noexcept {
     if (!book.has_data()) return Signal::NO_SIGNAL;
@@ -26,9 +29,9 @@ inline Signal decide(const OrderBook& book) noexcept {
 
 inline const char* signal_str(Signal s) {
     switch (s) {
-        case Signal::BUY:       return ""BUY"";
-        case Signal::SELL:      return ""SELL"";
-        case Signal::NO_SIGNAL: return ""NO_SIGNAL"";
+        case Signal::BUY:       return "BUY";
+        case Signal::SELL:      return "SELL";
+        case Signal::NO_SIGNAL: return "NO_SIGNAL";
     }
-    return ""UNKNOWN"";
+    return "UNKNOWN";
 }

@@ -1,5 +1,5 @@
-﻿#pragma once
-#include ""strategy.hpp""
+#pragma once
+#include "strategy.hpp"
 #include <cstdint>
 
 // RiskGuard applies pre-trade checks before any order is emitted.

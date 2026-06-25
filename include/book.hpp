@@ -1,5 +1,5 @@
-﻿#pragma once
-#include ""wire.hpp""
+#pragma once
+#include "wire.hpp"
 #include <cstdint>
 
 struct OrderBook {
@@ -19,7 +19,6 @@ struct OrderBook {
         return true;
     }
 
-    bool has_data() const noexcept { return bid_price > 0; }
-    int32_t spread() const noexcept { return ask_price - bid_price; }
+    bool    has_data() const noexcept { return bid_price > 0; }
+    int32_t spread()   const noexcept { return ask_price - bid_price; }
 };
-

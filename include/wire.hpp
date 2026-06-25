@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 
 // Fixed-size packed structs for the market-data and order wire protocol.
@@ -16,7 +16,7 @@ struct MarketPacket {
     uint64_t seq_no;         // monotonic sequence number
 };
 
-static_assert(sizeof(MarketPacket) == 26, ""MarketPacket size changed"");
+static_assert(sizeof(MarketPacket) == 26, "MarketPacket size changed");
 
 struct OrderPacket {
     uint16_t instrument_id;
@@ -26,7 +26,7 @@ struct OrderPacket {
     uint64_t seq_no;
 };
 
-static_assert(sizeof(OrderPacket) == 19, ""OrderPacket size changed"");
+static_assert(sizeof(OrderPacket) == 19, "OrderPacket size changed");
 
 #pragma pack(pop)
 
@@ -39,10 +39,10 @@ enum class ProcessResult : uint8_t {
 
 inline const char* result_str(ProcessResult r) {
     switch (r) {
-        case ProcessResult::ORDER_EMITTED: return ""ORDER_EMITTED"";
-        case ProcessResult::NO_SIGNAL:     return ""NO_SIGNAL"";
-        case ProcessResult::RISK_REJECTED: return ""RISK_REJECTED"";
-        case ProcessResult::INVALID_FRAME: return ""INVALID_FRAME"";
+        case ProcessResult::ORDER_EMITTED: return "ORDER_EMITTED";
+        case ProcessResult::NO_SIGNAL:     return "NO_SIGNAL";
+        case ProcessResult::RISK_REJECTED: return "RISK_REJECTED";
+        case ProcessResult::INVALID_FRAME: return "INVALID_FRAME";
     }
-    return ""UNKNOWN"";
+    return "UNKNOWN";
 }
